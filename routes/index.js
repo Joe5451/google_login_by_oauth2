@@ -1,6 +1,7 @@
 const {OAuth2Client} = require('google-auth-library');
 var express = require('express');
 var router = express.Router();
+const OAuth2keys = require('./../oauth2.key.json');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -13,19 +14,35 @@ router.get('/login', function(req, res, next) {
 });
 
 /* Post google Login */
-router.get('/google_login', function(req, res, next) {
+router.get('/google_login', async function(req, res, next) {
     const oAuth2Client = new OAuth2Client(
-        '413085947600-pqac57sjp2dn2oo95fko266m6dq1v7dc.apps.googleusercontent.com',
-        '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',
-        'http://localhost:3000/google_back'
+        OAuth2keys.web.client_id,
+        OAuth2keys.web.client_secret,
+        OAuth2keys.web.redirect_uris[0]
     );
 
-    const authorizeUrl = oAuth2Client.generateAuthUrl({
-        access_type: 'offline',
-        scope: 'https://www.googleapis.com/auth/userinfo.profile',
-    });
+    const code = req.query.code;
 
-    res.redirect(authorizeUrl);
+    if (code !== undefined) {
+        const getTokenRes = await oAuth2Client.getToken(code);
+        oAuth2Client.setCredentials(getTokenRes.tokens);
+    
+        const loginTicket = await oAuth2Client.verifyIdToken({
+            idToken: oAuth2Client.credentials.id_token,
+            audience: OAuth2keys.web.client_id,
+        });
+
+        console.log(loginTicket);
+
+        res.send('ok');
+    } else {
+        const authorizeUrl = oAuth2Client.generateAuthUrl({
+            access_type: 'offline',
+            scope: 'https://www.googleapis.com/auth/userinfo.profile',
+        });
+
+        res.redirect(authorizeUrl);
+    }
 });
 
 module.exports = router;
