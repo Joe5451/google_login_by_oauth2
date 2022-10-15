@@ -38,7 +38,10 @@ router.get('/google_login', async function(req, res, next) {
     } else {
         const authorizeUrl = oAuth2Client.generateAuthUrl({
             access_type: 'offline',
-            scope: 'https://www.googleapis.com/auth/userinfo.profile',
+            scope: [
+                'https://www.googleapis.com/auth/userinfo.email',
+                'https://www.googleapis.com/auth/userinfo.profile',
+            ]
         });
 
         res.redirect(authorizeUrl);
