@@ -5,25 +5,32 @@ const OAuth2keys = require('./../oauth2.key.json');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+  	res.render('index', { title: 'Express' });
 });
 
 /* Login page. */
 router.get('/login', function(req, res, next) {
-  res.render('login', { title: 'Google Login' });
+    const login_state = parseInt(req.cookies.login_state);
+
+	if (login_state === 1)
+        res.redirect('/user_info');
+	else
+    	res.render('login', { title: 'Google Login' });
 });
 
 /* Post google Login */
 router.get('/google_login', async function(req, res, next) {
+    const code = req.query.code;
+    const login_state = parseInt(req.cookies.login_state);
     const oAuth2Client = new OAuth2Client(
         OAuth2keys.web.client_id,
         OAuth2keys.web.client_secret,
         OAuth2keys.web.redirect_uris[0]
     );
 
-    const code = req.query.code;
-
-    if (code !== undefined) {
+    if (login_state === 1) {
+        res.redirect('/user_info');
+    } else if (code !== undefined) {
         const getTokenRes = await oAuth2Client.getToken(code);
         oAuth2Client.setCredentials(getTokenRes.tokens);
     
@@ -35,14 +42,14 @@ router.get('/google_login', async function(req, res, next) {
 
         const userInfo = loginTicket.payload;
 
-        res.render('user_info', {
-            title: '登入者',
+        res.cookie('login_state', 1);
+        res.cookie('user_info', {
             name: userInfo.name,
             email: userInfo.email,
-            picture: userInfo.picture
+            avatar: userInfo.picture
         });
 
-        res.end();
+        res.redirect('/user_info')
     } else {
         const authorizeUrl = oAuth2Client.generateAuthUrl({
             access_type: 'offline',
@@ -54,6 +61,27 @@ router.get('/google_login', async function(req, res, next) {
 
         res.redirect(authorizeUrl);
     }
+});
+
+/* User Info Page */
+router.get('/user_info', function(req, res, next) {
+    let login_state = parseInt(req.cookies.login_state);
+    let user_info = req.cookies.user_info;
+
+    console.log(typeof login_state);
+
+    if (login_state !== 1) {
+        res.redirect('/login');
+        return;
+    }
+
+    if (user_info.name === undefined || user_info.email === undefined || user_info.avatar === undefined) {
+        res.cookie('login_state', 0);
+        res.redirect('/login');
+        return;
+    }
+
+    res.render('user_info', { title: '登入者頁面', ...user_info });
 });
 
 module.exports = router;
