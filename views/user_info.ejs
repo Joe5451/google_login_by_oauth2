@@ -7,8 +7,12 @@
     <meta name="google-signin-client_id" content="413085947600-pqac57sjp2dn2oo95fko266m6dq1v7dc.apps.googleusercontent.com">
   </head>
   <body>
-    <img src="<%= avatar %>" class="user_avatar">
-    <div><%= name %></div>
-    <div><%= email %></div>
+    <div class="user_info_container">
+      <img src="<%= avatar %>" class="user_avatar">
+      <div class="user_name"><%= name %></div>
+      <div class="user_email"><%= email %></div>
+      <a href="/logout" class="logout_btn">登出</a>
+    </div>
+
   </body>
 </html>
