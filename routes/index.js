@@ -31,14 +31,22 @@ router.get('/google_login', async function(req, res, next) {
             idToken: oAuth2Client.credentials.id_token,
             audience: OAuth2keys.web.client_id,
         });
+        // console.log(loginTicket);
 
-        console.log(loginTicket);
+        const userInfo = loginTicket.payload;
 
-        res.send('ok');
+        res.render('user_info', {
+            title: '登入者',
+            name: userInfo.name,
+            email: userInfo.email,
+            picture: userInfo.picture
+        });
+
+        res.end();
     } else {
         const authorizeUrl = oAuth2Client.generateAuthUrl({
             access_type: 'offline',
-            scope: [
+            scope: [ // 需在 OAuth 設定範圍
                 'https://www.googleapis.com/auth/userinfo.email',
                 'https://www.googleapis.com/auth/userinfo.profile',
             ]
