@@ -7,6 +7,10 @@ https://console.cloud.google.com/apis/credentials set redirect url http://localh
 download credential json and replace the file **oauth2.key.json**
 
 ```
+npm install
+```
+
+```
 npm run devstart
 ```
 
