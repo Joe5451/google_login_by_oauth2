@@ -5,7 +5,7 @@ const OAuth2keys = require('./../oauth2.key.json');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  	res.render('index', { title: 'Express' });
+	res.redirect('/login');
 });
 
 /* Login page. */
@@ -39,6 +39,7 @@ router.get('/google_login', async function(req, res, next) {
             audience: OAuth2keys.web.client_id,
         });
         // console.log(loginTicket);
+		// loginTicket.payload.sub 可作為 google 登入 id 儲存在資料庫中
 
         const userInfo = loginTicket.payload;
 
@@ -61,6 +62,12 @@ router.get('/google_login', async function(req, res, next) {
 
         res.redirect(authorizeUrl);
     }
+});
+
+router.get('/logout', function(req, res, next) {
+	res.clearCookie('login_state');
+	res.clearCookie('user_info');
+	res.redirect('/login');
 });
 
 /* User Info Page */
